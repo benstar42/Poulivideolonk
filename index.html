@@ -2,191 +2,124 @@
 <html lang="ht">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sistèm Pwen Avanse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Media Saver Offline</title>
+
 <style>
-body{font-family:Arial;margin:0;background:#eef2f7}
-header{background:#1565c0;color:#fff;padding:15px;text-align:center}
-.container{max-width:1000px;margin:auto;padding:15px}
-.card{background:#fff;padding:15px;border-radius:10px;margin:10px 0;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-input,button{width:100%;padding:10px;margin:5px 0;box-sizing:border-box}
-button{background:#1565c0;color:#fff;border:none;border-radius:6px}
-.hidden{display:none}
-.profile{width:90px;height:90px;border-radius:50%;object-fit:cover}
-table{width:100%;border-collapse:collapse}
-td,th{border:1px solid #ddd;padding:8px}
-.dark{background:#111;color:#eee}
-.dark .card{background:#222;color:#eee}
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #111;
+    color: white;
+}
+
+header {
+    background: #1e88e5;
+    padding: 15px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.container {
+    padding: 15px;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    background: #00c853;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.card {
+    background: #222;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+a {
+    color: #4fc3f7;
+    word-break: break-all;
+}
 </style>
 </head>
+
 <body>
-<header><h2>Sistèm Pwen Avanse Demo</h2></header>
+
+<header>📥 Media Saver Offline</header>
 
 <div class="container">
 
-<div id="auth" class="card">
-<h3>Kreye Kont / Konekte</h3>
-<input id="u" placeholder="Non itilizatè">
-<input id="p" type="password" placeholder="Modpas">
-<button onclick="register()">Kreye Kont</button>
-<button onclick="login()">Konekte</button>
-</div>
+<input id="url" placeholder="Mete YouTube / Facebook / Image link">
 
-<div id="app" class="hidden">
+<select id="type">
+    <option value="video">Video Link</option>
+    <option value="image">Image Link</option>
+</select>
 
-<div class="card">
-<img id="avatar" class="profile" src="https://via.placeholder.com/90">
-<h3 id="welcome"></h3>
-<p>Pwen: <b id="points">0</b></p>
-<input type="file" accept="image/*" onchange="uploadPhoto(event)">
-<button onclick="toggleTheme()">Mode Nwa/Klè</button>
-<button onclick="logout()">Dekonekte</button>
-</div>
+<button onclick="saveLink()">💾 Save Link</button>
 
-<div class="card">
-<h3>Travay</h3>
-<button onclick="claim('YouTube Demo',10)">YouTube +10</button>
-<button onclick="claim('Facebook Demo',10)">Facebook +10</button>
-<button onclick="claim('TikTok Demo',10)">TikTok +10</button>
-<button onclick="claim('Pataje Lyen',20)">Pataje Lyen +20</button>
-</div>
+<div id="list"></div>
 
-<div class="card">
-<h3>Retrè Pwen Demo</h3>
-<input id="withdrawAmount" type="number" placeholder="Kantite pwen">
-<button onclick="withdraw()">Mande Retrè</button>
-</div>
-
-<div class="card">
-<h3>Istorik</h3>
-<ul id="history"></ul>
-</div>
-
-<div class="card">
-<h3>Leaderboard</h3>
-<table>
-<thead><tr><th>Itilizatè</th><th>Pwen</th></tr></thead>
-<tbody id="leaders"></tbody>
-</table>
-</div>
-
-<div class="card">
-<h3>Admin Demo</h3>
-<p>Admin: admin / 1234</p>
-<input id="bonusUser" placeholder="Non itilizatè">
-<input id="bonusPoints" type="number" placeholder="Bonus pwen">
-<button onclick="adminBonus()">Ajoute Bonus</button>
-</div>
-
-</div>
 </div>
 
 <script>
-function users(){return JSON.parse(localStorage.getItem('users')||'{}')}
-function save(x){localStorage.setItem('users',JSON.stringify(x))}
+let data = JSON.parse(localStorage.getItem("mediaData") || "[]");
 
-function register(){
- let U=u.value.trim(), P=p.value.trim();
- if(!U||!P)return alert('Ranpli tout chan yo');
- let data=users();
- if(data[U]) return alert('Kont egziste deja');
- data[U]={password:P,points:0,history:[],photo:''};
- save(data);
- alert('Kont kreye');
+function saveLink() {
+    let url = document.getElementById("url").value;
+    let type = document.getElementById("type").value;
+
+    if (!url) return;
+
+    data.push({url, type});
+    localStorage.setItem("mediaData", JSON.stringify(data));
+
+    document.getElementById("url").value = "";
+    render();
 }
 
-function login(){
- let data=users();
- if(data[u.value] && data[u.value].password===p.value){
-   localStorage.setItem('currentUser',u.value);
-   load();
- }else alert('Enfòmasyon pa bon');
+function render() {
+    let list = document.getElementById("list");
+    list.innerHTML = "";
+
+    data.forEach((item, index) => {
+
+        let div = document.createElement("div");
+        div.className = "card";
+
+        let html = `<b>${item.type.toUpperCase()}</b><br>
+        <a href="${item.url}" target="_blank">${item.url}</a><br><br>`;
+
+        if (item.type === "image") {
+            html += `<img src="${item.url}" style="width:100%;border-radius:10px;">`;
+        }
+
+        html += `<br><button onclick="removeItem(${index})">🗑 Delete</button>`;
+
+        div.innerHTML = html;
+        list.appendChild(div);
+    });
 }
 
-function load(){
- let cu=localStorage.getItem('currentUser');
- if(!cu)return;
- auth.classList.add('hidden');
- app.classList.remove('hidden');
- let data=users()[cu];
- welcome.innerText='Byenvini '+cu;
- points.innerText=data.points;
- if(data.photo) avatar.src=data.photo;
-
- history.innerHTML='';
- data.history.forEach(i=>{
-  let li=document.createElement('li');
-  li.textContent=i;
-  history.appendChild(li);
- });
- leaderboard();
+function removeItem(i) {
+    data.splice(i, 1);
+    localStorage.setItem("mediaData", JSON.stringify(data));
+    render();
 }
 
-function claim(name,p){
- let cu=localStorage.getItem('currentUser');
- let all=users();
- all[cu].points+=p;
- all[cu].history.unshift(name+' +'+p+' pwen');
- save(all);
- load();
-}
-
-function withdraw(){
- let cu=localStorage.getItem('currentUser');
- let all=users();
- let amt=parseInt(withdrawAmount.value||0);
- if(amt<=0) return;
- if(all[cu].points<amt) return alert('Pwen pa sifi');
- all[cu].points-=amt;
- all[cu].history.unshift('Retrè demo: -'+amt);
- save(all);
- load();
-}
-
-function leaderboard(){
- let body=document.getElementById('leaders');
- body.innerHTML='';
- let arr=Object.entries(users()).sort((a,b)=>b[1].points-a[1].points);
- arr.forEach(x=>{
-  body.innerHTML+=`<tr><td>${x[0]}</td><td>${x[1].points}</td></tr>`;
- });
-}
-
-function uploadPhoto(e){
- let f=e.target.files[0];
- if(!f)return;
- let r=new FileReader();
- r.onload=function(){
-   let cu=localStorage.getItem('currentUser');
-   let all=users();
-   all[cu].photo=r.result;
-   save(all);
-   load();
- }
- r.readAsDataURL(f);
-}
-
-function adminBonus(){
- let target=bonusUser.value.trim();
- let pts=parseInt(bonusPoints.value||0);
- let all=users();
- if(!all[target]) return alert('Itilizatè pa egziste');
- all[target].points+=pts;
- all[target].history.unshift('Bonus admin +'+pts);
- save(all);
- load();
-}
-
-function toggleTheme(){
- document.body.classList.toggle('dark');
-}
-
-function logout(){
- localStorage.removeItem('currentUser');
- location.reload();
-}
-
-if(localStorage.getItem('currentUser')) load();
+render();
 </script>
+
 </body>
 </html>
